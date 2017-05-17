@@ -139,7 +139,7 @@ bind :: (String -> [(a, String)]) -> (a -> (String -> [(b, String)]) -> (String 
 --  valuable work on your behalf. But you won't have to struggle with them.
 --  You'll be working at a higher level of abstraction where they just make sense.
 --
--- But for now, to cemet these ideas in my head, I need to walk through them.
+-- But for now, to cement these ideas in my head, I need to walk through them.
 --  I'm going to change my example, to make it MUCH EASIER on me. I'll do
 --  a bind with only 2 levels in it.
 
@@ -175,33 +175,21 @@ bind :: (String -> [(a, String)]) -> (a -> (String -> [(b, String)]) -> (String 
 -- item applied to "bar" is [('b', "ar")]
 -- So a becomes 'b', and cs' becomes "ar".
 -- Luckily there is only one item in the list, so merely substitute a and cs'
--- (\cs -> concat [(f 'b') "ar"])
+-- concat [(f 'b') "ar"]
 -- f is (\c -> return c)
 -- So substituting f:
--- (\cs -> concat [( (\c -> return c) 'b') "ar"])
+--         concat [( (\c -> return c) 'b') "ar"]
 --  and this part    ^^^^^^^^^^^^^^^^^^^^
 --  simplifies to return 'b', so we have
--- (\cs -> concat [(return 'b') "ar"])
+-- concat [(return 'b') "ar"]
 -- (return 'b') evaluates to (\xs -> [('b', xs)]), so we have
--- (\cs -> concat [(\xs -> [('b', xs)]) "ar" ])
+--         concat [(\xs -> [('b', xs)]) "ar" ]
 -- and this part   ^^^^^^^^^^^^^^^^^^^^^^^^^ merely means pass "ar" to that lambda
 -- which results in [('b', "ar")]
 -- So we have: 
--- (\cs -> concat [ [('b', "ar")] ])
+-- concat [ [('b', "ar")] ]
 -- per definition of concat, that becomes:
--- (\cs -> [('b', "ar")])
---
--- OK, so this is surprising me a bit. The end result of (p "bar") is a 
--- PARSER FUNCTION! That should NOT surprise, because "once you're in a monad,
---  you don't get back out." At least not with bind you don't. 
---  So we get a function that IGNORES its input and returns [('b', "ar")]. The
---  only reason we want it to be a function is because now we can continue
---  right on combining  it with more parser functions. Hence the term "combinators"
---  after all!
---
--- Winding up with a function that is a glorified constant seems silly but it 
---  is only because I chose such a simple case. Now, let's add another level in 
---  there.
+-- [('b',"ar")]
 --
 -- pp = item >>= \c -> 
 --        item >>= \d -> 
@@ -413,15 +401,6 @@ return a = (\xs -> [(a, xs)])
 --  level details are happening for you!
 -- I think my parentheses are messed up.
 
-
-
-
-
-
-
-
-
-
 -- Applying 'a' to that gives
 return ('b', 'a') "ar"
 -- The definiton of return is: 
@@ -439,7 +418,21 @@ return ('b', 'a') "r"
 -- and this     ^^^^^^^^^^^ became [('b', 'a'), "r"], giving
 (\cs -> concat [[('b', 'a'), "r"]])
 
+--MORE MISTAKEN TEXT:
+-- OK, so this is surprising me a bit. The end result of (p "bar") is a 
+-- PARSER FUNCTION! That should NOT surprise, because "once you're in a monad,
+--  you don't get back out." At least not with bind you don't. 
+--  So we get a function that IGNORES its input and returns [('b', "ar")]. The
+--  only reason we want it to be a function is because now we can continue
+--  right on combining  it with more parser functions. Hence the term "combinators"
+--  after all!
+--
+-- Winding up with a function that is a glorified constant seems silly but it 
+--  is only because I chose such a simple case. Now, let's add another level in 
+--  there.
 
+-- THAT WAS WRONG. p is a parser function. (p "bar") is a list of tuples, 
+--  each of which has an ast in the first, and leftover string in the second.
 
 
 
