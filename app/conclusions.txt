@@ -1,0 +1,14 @@
+What were my original questions?
+1. I need to write the bind fn myself, first without the newtype and 
+then with it.
+2. I was trying to figure out if non-determinism was Steven's goal for list and
+bind. The answer is yes. Even though Parsec doesn't use nondetermism (usualklky),
+Steven was borrowing a monadic parser from Functional Pearls, just to 
+illustratre the concept of functional parsers. And that Functional Pearls 
+parser DOES use lists in the monad to handle non-determinism.
+3. To do the job, monadic parsers DON'T HAVE TO TRACK POSITION! Parsec
+does track position for good error messages. But NOT to do the task of parsing!
+Each parser fn returns the unconsumed input, and the next parser picks up right 
+there!
+
+

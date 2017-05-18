@@ -268,7 +268,14 @@ concat [ [(('b','a'),"r")]    ]
 --  you've built up.
 
 --NEXT: Test this out and confirm by typing my definitions (just like steven's 
---  except no newType).
+--  except no newType). (DONE: See FunctionalPearlsParser.hs)
+
+
+
+
+
+
+
 
 
 
