@@ -6,11 +6,11 @@ import Data.Char
 import Control.Monad
 import Control.Applicative
 
-newtype Parser a = Parser { parse :: String -> [(a, String)]}
+-- newtype Parser a = Parser { parse :: String -> [(a, String)]}
 
-runParser :: Parser a -> String -> a
+runParser :: (String -> [(a, String)]) -> String -> a
 runParser m s = 
-    case parse m s of
+    case m s of
         [(res, [])] -> res
         [(_, rs)]   -> error "Parser did not consume entire stream"
         _           -> error "Parser error"
@@ -33,9 +33,9 @@ runParser m s =
 --  too simple to be worthwhile.)
 
 -- item is for advancing the parser one character.
-item :: Parser Char
+item :: (String -> [(Char, String)]) 
 -- That type sig means, I'll return a Char wrapped in the parser monad.
-item = Parser $ \s ->
+item = \s ->
     case s of 
         []      -> []
         (c:cs)  -> [(c,cs)]
@@ -45,6 +45,10 @@ item = Parser $ \s ->
 --  the rest of the string was leftover.
 
 -- Clearly, there are no magical mysteries so far.
+
+-- here's return:
+myReturn :: a -> (String -> [(a, String)])
+myReturn a = \cs -> [(a, cs)]
 
 -- now it's time for the bind operator. Since Steven chose a list monad (I wish
 --  he hadn;t since Parsec doesn't), our bind operator has to map over the
@@ -68,5 +72,41 @@ item = Parser $ \s ->
 --   so I can work wiht the pieces at the repl.
 --  see CharlieWipNano.hs
 
+-- OK, BACK AND READY TO ROLL.
+-- Spoiler alert, I've already seen the defition of bind and become quite 
+--  familiar with it. But I want to do it without list comprehension
+--  anyway, so it will be a bit like writing it from scratch. I'll try the 
+--  approach of making each little piece public and named too.
+
+-- To compare my results, here's the REAL bind from the paper
+bind :: (String-> [(a, String)]) -> (a -> (String-> [(b, String)])) -> (String-> [(b, String)])
+p `bind` f = (\cs -> concat [(f a) cs' |
+    (a, cs') <- p cs]) 
+
+-- First, here's the type:
+-- myBind :: (String-> [(a, String)]) -> (a -> (String-> [(b, String)])) -> (String-> [(b, String)])
+-- Also, remember that 
+-- item >>= \c -> item >>= \d -> return (c, d)
+-- when applied to "bar", should return
+-- [(('b','a'),"r")]
+-- which is a list with one item that is a tuple. The tuple contains an ast
+--   of ('b', 'a') and a leftover of "r".
+
+p `myBind` f = 
+    -- Gotta return a function, so let's start there:
+    \cs -> 
+        -- The idea is to CALL the first parser on the input.
+        let leftResult = p cs
+        -- Now leftResult is a list of tuples. You need to loop through
+        --  each one, deconstruct it to get ast and leftover, and then
+        --  call f with the ast. 
+            mapResult = map (\(ast, leftover) -> 
+                let newParser = f ast
+                    endResult = newParser leftover
+                    in endResult
+                ) leftResult
+                in mapResult
+
+-- This is close. But it is 3 levels deep of a list. Dig into why later.
 
     
