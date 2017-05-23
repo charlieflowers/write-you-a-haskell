@@ -100,13 +100,47 @@ p `myBind` f =
         -- Now leftResult is a list of tuples. You need to loop through
         --  each one, deconstruct it to get ast and leftover, and then
         --  call f with the ast. 
-            mapResult = map (\(ast, leftover) -> 
-                let newParser = f ast
-                    endResult = newParser leftover
-                    in endResult
+            mapResult = map (\(leftAst, leftRemains) -> 
+                let rightParser = f leftAst
+                    rightParserResult = rightParser leftRemains
+                    in rightParserResult
                 ) leftResult
-                in mapResult
+                in concat mapResult
 
--- This is close. But it is 3 levels deep of a list. Dig into why later.
+example = item `myBind` \c ->
+    item `myBind` \d ->
+         myReturn (c, d)
+
+result = example "bar"
+
+-- This is close. I'm getting: 
+-- I get:       [([(('b','a'),"r")],"ar")]
+-- should get:  [(('b','a'),"r")]
+
+-- What should I get? 
+hisReturn :: a -> (String -> [(a, String)])
+hisReturn a = (\cs -> [(a, cs)])
+
+hisBind :: (String -> [(a, String)]) -> (a -> (String -> [(b, String)])) -> (String -> [(b, String)])
+p `hisBind` f = (\cs -> concat [(f a) cs' |
+    (a, cs') <- p cs])
+
+hisExample = item `hisBind` \c ->
+    item `hisBind` \d ->
+         hisReturn (c, d)
+
+hisResult = hisExample "bar"         
+
+-- I should be getting: [(('b','a'),"r")]
 
     
+smallerExample = item `myBind` \c ->
+    myReturn ('Z', c)
+
+smallerResult = smallerExample "bar"
+
+hisSmallerExample = item `hisBind` \c ->
+    hisReturn ('Z', c)
+
+hisSmallerResult = hisSmallerExample "bar" 
+ 
