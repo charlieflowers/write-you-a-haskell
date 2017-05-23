@@ -115,6 +115,7 @@ result = example "bar"
 
 --I GOT IT!!! (Other comments below are from the struggles beforehand)
 
+-- I now understand how monadic parsers work.
 
 
 

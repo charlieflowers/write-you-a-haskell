@@ -11,4 +11,48 @@ does track position for good error messages. But NOT to do the task of parsing!
 Each parser fn returns the unconsumed input, and the next parser picks up right 
 there!
 
+-- HERE ARE THE REALLY BIG CONCLUSIONS!!!
+
+4. When I was trying to write bind myself for the first time, I struggled. I 
+had called the left parser, and I had obtained and called the right parser. 
+I was trying to do the same "housekeeping" to the right parser's result as i
+did to the left parser's result. BUT THAT WAS WORKING TOO HARD, AND IT IS THE
+KEY MISTAKE OF NOT GETTING INDUCTION/RECURSION!!!! This is really GOOD NEWS 
+because it means the task is SO MUCH SIMPLER THAN I THOUGHT. And it ties in 
+with the feeling I got from watching Graham Hutton work through his example ...
+the feeling of WIELDING RECURSIVE POWER!
+
+The point is this -- when dealing with induction/recursion, you should PRETEND you
+ALREADY HAVE A FUNCTION THAT SOLVES THE CASE FOR N, AND WRITE A FUNCTION
+THAT SOLVES FOR N+1 IN TERMS OF THAT FUNCTION! And once you do that,
+magically, suddenly, you DO have a function that solves for n (it is the fn
+that you just wrote!). [Note: I tweeted this years ago. It is now coming back to me].
+
+WHAT DOES RECURSION HAVE TO DO WITH BIND? Good question. Neither bind itself
+nor the functions I was passing to bind (item and return) are actually 
+recursive, not even indirectly. BUT, the situation is still essentially the 
+same, and the same principle as above still applies. My bind example was:
+
+p = item >>= \c -> item >>= \d -> return (c, d)
+
+Well, for the FIRST call to bind, the left parser is "item". BUT the RIGHT
+parser is "\c -> item >>= \d -> return (c, d)". So, the definition of bind 
+took in a function that called bind itself. And this is common with 
+combinators. 
+
+Therefore, the SAME principle was needed: pretend you already have a black 
+box that solves the right-hand portion of things. Now, just define something
+that defines the first bind IN TERMS of that function. And by pretending
+that, I wrote "bind", which could then be used by the right-hand side!
+
+This is the core principle that is going to make my life so much easier 
+and my Haskell code so much more powerful: 
+
+***********************************************************************
+ PRETEND you ALREADY HAVE A FUNCTION THAT SOLVES THE CASE FOR N, AND WRITE A FUNCTION
+THAT SOLVES FOR N+1 IN TERMS OF THAT FUNCTION!
+***********************************************************************
+
+
+
 
