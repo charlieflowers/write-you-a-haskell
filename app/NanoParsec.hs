@@ -113,6 +113,13 @@ example = item `myBind` \c ->
 
 result = example "bar"
 
+--I GOT IT!!! (Other comments below are from the struggles beforehand)
+
+
+
+
+
+
 -- This is close. I'm getting: 
 -- I get:       [([(('b','a'),"r")],"ar")]
 -- should get:  [(('b','a'),"r")]
