@@ -98,7 +98,7 @@ p `myBind` f =
 
 -- OK! This is UGLY AS SIN, and WAAAY TOO VERBOSE, due to some haskell rustiness. But it APPEARS CORRECT.
 
--- Here are some tests: 
+-- Here are some  tests: 
 chain = item `myBind` \c -> item `myBind` \d -> myReturn (c,d)
 
 example1 = chain "dog" -- Consumed (Success ('d', 'o') "g")
