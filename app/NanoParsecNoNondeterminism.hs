@@ -31,8 +31,10 @@ type Parser a       = String -> Consumed a
 
 data Consumed a     = Consumed (Reply a)
                     | Empty (Reply a)
+    deriving Show
 
 data Reply a        = Success a String | Failure String
+    deriving Show
 -- ..........................^^^ that is the AST
 -- .............................^^^^^^ that is the leftover text
 
@@ -52,7 +54,7 @@ item :: Parser Char
 item = \s ->
     case s of 
         []      -> Empty (Failure "hit eof!") 
-        (c:cs)  -> Consumed (Success 'c' cs)
+        (c:cs)  -> Consumed (Success c cs)
 
 -- So, if you give item empty input, it does not consume, and it fails. If you give it a list 
 --  of chars (aka, a string), it will indicate that it found one char and consumed it, and 
