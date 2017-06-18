@@ -81,19 +81,20 @@ p `myBind` f =
         --  we need to apply the right-side parser to the leftovers.
         -- THIS IS WAY WAY WAY SIMPLER THAN THE TYPICAL HUTTON NONDETERMINISTIC LIST-BASED PARSERS!
         in case leftResult of 
-            Consumed Failure msg                -> Consumed Failure msg
-            Empty Failure msg                   -> Empty Failure msg
-            Consumed Success leftAst leftover   -> callRightParser true leftAst leftover
-            Empty Success leftAst leftover      -> callRightParser false leftAst leftover
+            Consumed (Failure msg)                -> Consumed (Failure msg)
+            Empty (Failure msg)                   -> Empty (Failure msg)
+            Consumed (Success leftAst leftover)   -> callRightParser True leftAst leftover
+            Empty (Success leftAst leftover)      -> callRightParser False leftAst leftover
             where
                 callRightParser didLeftConsume leftAst leftover = 
                     let rightParser = f leftAst
                         rightResult = rightParser leftover
-                        in case rightResult -> 
-                            Consumed Failure msg                        -> rightResult
-                            Empty Failure msg                           -> if didLeftConsume then Consume Failure msg else rightResult
-                            Consumed Success rightAst rightLeftover     -> rightResult
-                            Empty Success rightAst rightLeftover        -> if didLeftConsume then Consume Success rightAst rightLeftover else rightResult
+                        in 
+                            case rightResult of 
+                                Consumed (Failure msg)                        -> rightResult
+                                Empty (Failure msg)                           -> if didLeftConsume then Consume Failure msg else rightResult
+                                Consumed (Success rightAst rightLeftover)     -> rightResult
+                                Empty (Success rightAst rightLeftover)        -> if didLeftConsume then Consume Success rightAst rightLeftover else rightResult
 
 
                     
