@@ -92,9 +92,18 @@ p `myBind` f =
                         in 
                             case rightResult of 
                                 Consumed (Failure msg)                        -> rightResult
-                                Empty (Failure msg)                           -> if didLeftConsume then Consume Failure msg else rightResult
+                                Empty (Failure msg)                           -> if didLeftConsume then Consumed (Failure msg) else rightResult
                                 Consumed (Success rightAst rightLeftover)     -> rightResult
-                                Empty (Success rightAst rightLeftover)        -> if didLeftConsume then Consume Success rightAst rightLeftover else rightResult
+                                Empty (Success rightAst rightLeftover)        -> if didLeftConsume then Consumed (Success rightAst rightLeftover) else rightResult
+
+-- OK! This is UGLY AS SIN, and WAAAY TOO VERBOSE, due to some haskell rustiness. But it APPEARS CORRECT.
+
+-- Here are some tests: 
+chain = item `myBind` \c -> item `myBind` \d -> myReturn (c,d)
+
+example1 = chain "dog" -- Consumed (Success ('d', 'o') "g")
+
+
 
 
                     
