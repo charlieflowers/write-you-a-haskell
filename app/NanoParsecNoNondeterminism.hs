@@ -66,3 +66,35 @@ myReturn :: a -> Parser a
 --  I bet it should not. I bet you want this to always tell the truth about whether input was consumed, because it is about
 --  avoiding accidental lookahead. So I'm going with that.
 myReturn a = \cs -> Empty (Success a cs)
+
+-- OK! Now getting to the good stuff! Let's write BIND!
+
+-- item >>= \c -> item >>= \d -> myReturn (c,d) should, when applied to "dog", return ('d', 'o').
+
+p `myBind` f = 
+    -- Gotta return a function ....
+    \cs -> 
+        -- Call the left parser on the input
+        let leftResult = p cs
+        -- Now, leftResult is a CONSUMED. If it failed, fail. If it succeeded, we don't care if it consumed or not. We 
+        --  need to get the right-side parser by executing a portion of the combinator machinery, and once we have it, 
+        --  we need to apply the right-side parser to the leftovers.
+        -- THIS IS WAY WAY WAY SIMPLER THAN THE TYPICAL HUTTON NONDETERMINISTIC LIST-BASED PARSERS!
+        in case leftResult of 
+            Consumed Failure msg                -> Consumed Failure msg
+            Empty Failure msg                   -> Empty Failure msg
+            Consumed Success leftAst leftover   -> callRightParser true leftAst leftover
+            Empty Success leftAst leftover      -> callRightParser false leftAst leftover
+            where
+                callRightParser didLeftConsume leftAst leftover = 
+                    let rightParser = f leftAst
+                        rightResult = rightParser leftover
+                        in case rightResult -> 
+                            Consumed Failure msg                        -> rightResult
+                            Empty Failure msg                           -> if didLeftConsume then Consume Failure msg else rightResult
+                            Consumed Success rightAst rightLeftover     -> rightResult
+                            Empty Success rightAst rightLeftover        -> if didLeftConsume then Consume Success rightAst rightLeftover else rightResult
+
+
+                    
+
