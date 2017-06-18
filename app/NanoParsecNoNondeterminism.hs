@@ -32,16 +32,16 @@ type Parser a       = String -> Consumed a
 data Consumed a     = Consumed (Reply a)
                     | Empty (Reply a)
 
-data Reply a        = Right a String | Left String
--- ........................^^^ that is the AST
--- ...........................^^^^^^ that is the leftover text
+data Reply a        = Success a String | Failure String
+-- ..........................^^^ that is the AST
+-- .............................^^^^^^ that is the leftover text
 
 runParser :: (Parser a) -> String -> a
 runParser m s = 
     case m s of
-        Consumed (Right ast [])    -> ast
-        Consumed (Right _ leftover) -> error "Parser did not consume entire stream"
-        _                           -> error "Parser error"
+        Consumed (Success ast [])       -> ast
+        Consumed (Success _ leftover)   -> error "Parser did not consume entire stream"
+        _                               -> error "Parser error"
 
 -- item is for advancing the parser one character.
 item :: Parser Char 
@@ -51,8 +51,8 @@ item :: Parser Char
 
 item = \s ->
     case s of 
-        []      -> Empty (Left "hit eof!") 
-        (c:cs)  -> Consumed (Right 'c' cs)
+        []      -> Empty (Failure "hit eof!") 
+        (c:cs)  -> Consumed (Success 'c' cs)
 
 -- So, if you give item empty input, it does not consume, and it fails. If you give it a list 
 --  of chars (aka, a string), it will indicate that it found one char and consumed it, and 
@@ -63,4 +63,4 @@ myReturn :: a -> Parser a
 -- here's the NEXT big question!!! Should RETURN act as if it CONSUMED anything? I don't have enough info to know yet. But
 --  I bet it should not. I bet you want this to always tell the truth about whether input was consumed, because it is about
 --  avoiding accidental lookahead. So I'm going with that.
-myReturn a = \cs -> Empty (Right 'a' cs)
+myReturn a = \cs -> Empty (Success a cs)
