@@ -134,8 +134,16 @@ pleft `option` pright =
         Empty (Failure _)                   -> pright cs
         _                                   -> leftResult
 
+-- HAH! i can't test OPTION yet because all I have is ITEM, which always succeeds! And that means, LET'S INTRODUCE FAILURE!
+failure :: Parser a
+failure _ = Empty (Failure "failure always fails")
 
-
+-- some expectations: 
+-- (failure `option` item) "test" should be Consumed (Success 't' "est")
+-- (failure `option` failure) "test" should be Empty (Failure "failure always fails")
+-- (item `option` failure) "test" should be Consumed (Success 't' "est")
+-- (chain `option` failure) "test" should be Consumed (Success ('t', 'e') "st")
+-- (failure `option` chain) "test" should be Consumed (Success ('t', 'e') "st")
 
 
 
