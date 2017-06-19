@@ -160,7 +160,7 @@ failure _ = Empty (Failure "failure always fails")
 -- Let's refresh on the requirements for Satifsy, from Write You a Haskell.
 satisfy :: (Char -> Bool) -> Parser Char
 
--- satisfy (`elem` "abc") "abc" should be Consumed (Success 'a' "bc")
+-- satisfy (`elem` "abc") "aXX" should be Consumed (Success 'a' "XX")
 -- satisfy isUpper "abc" should be Empty (Failure "did not meet predicate")
 -- satisfy isLower "abc" should be Consumed (Success 'a' "bc")
 -- satisfy isDigit "abc" should be Empty (Failure "did not meet predicate")
