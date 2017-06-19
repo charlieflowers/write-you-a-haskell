@@ -145,6 +145,41 @@ failure _ = Empty (Failure "failure always fails")
 -- (chain `option` failure) "test" should be Consumed (Success ('t', 'e') "st")
 -- (failure `option` chain) "test" should be Consumed (Success ('t', 'e') "st")
 
+-- Now, one question I have: is OPTION EXACTLY the same as Parsec's <|> operator, or is <|> something different? Lemme check the Parsec paper. YES! OPTION
+--  is the SAME THING as the Parsec paper's <|>. BUT -- I do notice that I failed to handle the "longest match" rule. If pleft succeeds without consuming anything, 
+--  then you want to return the result of pright! Cool!
+
+-- NOW! I have a deterministic choice operator, and it is time to write my own implementation of MANY! Sweet, this is the goal that drove all this.
+-- Many is itself a combinator that takes in a parser function. It then returns a parser function. Internally, it will try the parser fn you passed,
+--  and if it succeeds, keep on calling the parser you passed until it fails. It shouldn't be too hard.
+
+-- WAIT!! Jumping the gun! Need a few more basic parsers first.
+
+-- Like, SATISFY.
+
+-- Let's refresh on the requirements for Satifsy, from Write You a Haskell.
+satisfy :: (Char -> Bool) -> Parser Char
+
+-- satisfy (`elem` "abc") "abc" should be Consumed (Success 'a' "bc")
+-- satisfy isUpper "abc" should be Empty (Failure "did not meet predicate")
+-- satisfy isLower "abc" should be Consumed (Success 'a' "bc")
+-- satisfy isDigit "abc" should be Empty (Failure "did not meet predicate")
+-- satisfy isDigit "1bc" should be Consumed (Success '1' "bc")
+-- satisfy isDigit "" should be Empty (Failure "hit eof!")
+
+satisfy pred = \cs ->
+    let parseResult = item cs in
+    case parseResult of 
+        -- The only thing that bugs me here is we're returning Empty, when actually we DID consume a char for a bit there. Should this return Consumed?
+        Consumed (Success char _)   -> if pred char then parseResult else Empty (Failure "did not meet predicate")
+        _                           -> parseResult
+
+
+
+
+
+
+
 
 
 
