@@ -167,13 +167,18 @@ satisfy :: (Char -> Bool) -> Parser Char
 -- satisfy isDigit "1bc" should be Consumed (Success '1' "bc")
 -- satisfy isDigit "" should be Empty (Failure "hit eof!")
 
+-- HEY, ANOTHER NOTE! I did this in plain old pointy style. I could have written SATISFY without mentioning CS, in point free style, at the level of combinators!
 satisfy pred = \cs ->
     let parseResult = item cs in
     case parseResult of 
         -- The only thing that bugs me here is we're returning Empty, when actually we DID consume a char for a bit there. Should this return Consumed?
+        -- Or, maybe we should not be using ITEM to perform our one char lookahead.
         Consumed (Success char _)   -> if pred char then parseResult else Empty (Failure "did not meet predicate")
         _                           -> parseResult
 
+-- Now, let's make DIGIT. If the next char is a digit, parse it. Fail otherwise.
+digit :: Parser Char
+digit = satisfy isDigit
 
 
 
