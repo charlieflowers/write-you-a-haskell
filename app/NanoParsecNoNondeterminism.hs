@@ -180,6 +180,34 @@ satisfy pred = \cs ->
 digit :: Parser Char
 digit = satisfy isDigit
 
+-- NOW! Let's write MANY!!!!
+--
+-- Examples:
+-- many digit $ "12345AAA" should be Consumed (Success "12345" "AAA")
+-- many digit $ "ABCDEF" should be Empty (Success "" "ABCDEF") -- Note, many ALWAYS succeeds
+-- many digit $ "" should be Empty (Success "" "")
+
+-- Right here, you can see why MANY can't be based on SATISFY alone. (I was interrupted here and lost my train of thought! Hope it comes back!)
+-- Let me check functional pearls to see if this matches up. wELL, it doesn't offer any details. Let's see what "intro to parsing" has to say.
+-- Yes, it's examples match. So let's do it.
+
+many :: Parser a -> Parser a
+many parser = many parser []
+
+manyImpl :: Parser a -> [String] -> Parser a
+manyImpl parser acc = \cs -> 
+    let parserResult = parser cs in
+        case parserResult of
+            -- So this is interesting. I feel like I need to re-write BIND. And that makes me wonder if I'm missing something. 
+            Empty (Failure msg)                         -> Consumed (Success acc cs) -- todo: Get consumed vs empty right here
+            Consumed (Failure msg)                      -> Consumed (Success acc cs) 
+            Empty (Success ast leftover)                -> -- pick up here later.
+
+
+
+
+
+
 
 
 
