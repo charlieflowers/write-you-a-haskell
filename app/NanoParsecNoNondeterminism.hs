@@ -103,6 +103,43 @@ chain = item `myBind` \c -> item `myBind` \d -> myReturn (c,d)
 
 example1 = chain "dog" -- Consumed (Success ('d', 'o') "g")
 
+-- Now, what's next? What does write-you-a-haskell do next? It does FAILURE, OPTION and COMBINE next.
+-- HOLY COW!!! This is starting to get EASY. The nondeterminism of the default Hutton was what made it a confusing learning process 
+--  in the first place. If they want to help learners more, they should DEFINITELY remove that from the equation the first go around 
+--  and then pedagogically build up to it.
+
+-- I don't really need FAILURE ... it was implemented in the papers to create the monads. But I'm bypassing that for now.
+--  I merely need to implement COMBINE and OPTION.
+
+-- COMBINE DOESN'T MAKE SENSE EITHER!!! It would parse the input with p1 and p2, and concatenate the resulting lists. That is 
+--  ALL ABOUT NONDETERMINISM. At this point, I assume Parsec does not have any equivalent to the COMBINE operator. Lemme check the
+--  paper: indeed, it says nothing about it.
+
+-- What does functional pearls say about COMBINE? Does it confirm it is about NONDETERMINISM? YES! It says "the (++) operator is a 
+--  (non-deterministic) choice operator for parsers".
+
+-- So, it is simply time to implement OPTION, and I think it will be really easy.
+-- As mentioned at the very start of this file, OPTION is merely the (+++) operator from functional pearls. It is a LEFT-BIASED
+--  choice operator which returns ONLY THE FIRST PARSE RESULT, which makes it DETERMINISTIC.
+
+-- One thing to notice here: The OPTION combinator DOES NOT rely on SATISFY! It merely relies on the ability of each parser
+--  to succeed or fail. Satisfy comes later!
+
+-- So, OPTION means, try p1, but if it fails, go with p2. Here we go:
+
+pleft `option` pright = 
+    \cs -> let leftResult = pleft cs
+    in case leftResult of
+        Consumed (Failure _)                -> pright cs
+        Empty (Failure _)                   -> pright cs
+        _                                   -> leftResult
+
+
+
+
+
+
+
 
 
 
