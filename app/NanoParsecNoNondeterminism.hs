@@ -201,7 +201,14 @@ manyImpl parser acc = \cs ->
             -- So this is interesting. I feel like I need to re-write BIND. And that makes me wonder if I'm missing something. 
             Empty (Failure msg)                         -> Consumed (Success acc cs) -- todo: Get consumed vs empty right here
             Consumed (Failure msg)                      -> Consumed (Success acc cs) 
-            Empty (Success ast leftover)                -> -- pick up here later.
+            Consumed (Success char leftover)            ->
+                let theRest = manyImpl parser leftover in
+                    case theRest of 
+                        Consumed (Success string leftover)    -> Consumed (Success char:string leftover)
+                        Consumed 
+
+                    Consumed (Success char: )
+            Empty (Success ast leftover)                -> Consumed (Success ast:(manyImpl parser ))
 
 
 
